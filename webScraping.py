@@ -5,6 +5,7 @@ import requests
 import io
 from bs4 import BeautifulSoup
 import csv
+import mysql.connector
 import re
 import pytesseract
 from pytesseract import (
@@ -21,6 +22,8 @@ from pytesseract import (
     run_and_get_output
 )
 from PIL import Image
+
+
 
 urlTraveloka = 'https://www.traveloka.com/en-id/promotion'
 urlTiket = 'https://www.tiket.com/promo'
@@ -53,6 +56,7 @@ for peg in itemsPegi :
     imagPegi = Image.open(io.BytesIO(rPegi.content))
     textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
     # if 'http' not in img : img = 'https://www.pegipegi.com/promo/{}'.format(img)
+
     
     deskripsiPegi = BeautifulSoup(requests.get(linknyaPegi).text,'html.parser')
     try: 
@@ -64,14 +68,22 @@ for peg in itemsPegi :
         except :
             temaPegi = 'kosong'
 
-
-    print("==============")
-    print("Judul : " + judulPegi)
-    print("Masa Berlaku :"+ durasiPegi)
-    print("Image : "+ imgPegi)
-    print("Link ke detail"+linknyaPegi)
-    print("Deskripsi"+temaPegi)
-    print("--------------")
+    db = mysql.connector.connect(host = "127.0.0.1",user="root", password = "", database="cenpro")
+    cursor = db.cursor()
+    sql = ("INSERT INTO promo (judul,durasi,image,deskripsi,link) VALUES (%s, %s, %s, %s, %s)")
+    val = (judulPegi,durasiPegi,imgPegi,temaPegi,linknyaPegi)
+    cursor.execute(sql,val)
+    db.commit()
+    cursor.close()
+    db.close()
+    # print("==============")
+    # print("PEGI PEGI")
+    # print("Judul : " + judulPegi)
+    # print("Masa Berlaku :"+ durasiPegi)
+    # print("Image : "+ imgPegi)
+    # print("Link ke detail"+linknyaPegi)
+    # print("Deskripsi"+temaPegi)
+    # print("--------------")
 
 
 for tik in itemsTiket:
@@ -96,6 +108,7 @@ for tik in itemsTiket:
     try : imageTiket = tik.find('div','img-component').find('img')['data-src']
     except : imageTiket = "Tidak memiliki gambar"
     print("#############################")
+    print("TIKET.COM")
     print("Judul : ",judulTiket)
     print("Deskripsi : ",temaTiket)
     print("Info Tambahan : "+periodeTiket)
@@ -130,9 +143,17 @@ for tra in itemsTraveloka:
     try : imageTraveloka = tra.find('div','promo-thumb-img').find('img')['src']
     except : imageTraveloka = "Tidak memiliki gambar"
     print("#############################")
+    print("TRAVELOKA")
     print("Judul : ",judulTraveloka)
     print("Durasi : ",durationTraveloka)
     print("Deskripsi : ",temaTraveloka)
     print("Link Detail : ",linknyaTraveloka )
     print("Link Image : ",imageTraveloka)
     print("############################# \n")
+
+print(data)
+
+
+
+
+
