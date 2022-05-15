@@ -356,72 +356,72 @@ def check_location(kot,kal):
 ######################Jenis dapat, Potongan gk dapat################
 #Belum DAPAT START and Date
 
-# for gar in itemsCit:
-#     judul = gar.text
-#     try:
-#         img = gar.find('img')['src']
-#         if 'https' not in img:
-#             img = 'https://www.citilink.co.id{}'.format(img)
-#     except:
-#         img = "Tidak ada"
+for gar in itemsCit:
+    judul = gar.text
+    try:
+        img = gar.find('img')['src']
+        if 'https' not in img:
+            img = 'https://www.citilink.co.id{}'.format(img)
+    except:
+        img = "Tidak ada"
 
-#     try:
-#         linka = gar.find('a')['href']
-#     except:
-#         continue
+    try:
+        linka = gar.find('a')['href']
+    except:
+        continue
 
-#     deskripsi = BeautifulSoup(requests.get(linka).text, 'html.parser')
-#     try:
-#         try:
-#             tema = deskripsi.find('ol').text
-#         except:
-#             tema = deskripsi.find('div', 'content').find(
-#                 'div', 'sfContentBlock').text
-#     except:
-#         tema = "Go to detail link promo"
-#     duration = "Go to detail link promo"
+    deskripsi = BeautifulSoup(requests.get(linka).text, 'html.parser')
+    try:
+        try:
+            tema = deskripsi.find('ol').text
+        except:
+            tema = deskripsi.find('div', 'content').find(
+                'div', 'sfContentBlock').text
+    except:
+        tema = "Go to detail link promo"
+    duration = "Go to detail link promo"
 
-#     rPegi = requests.get(img, headers=headers)
-#     imagPegi = Image.open(io.BytesIO(rPegi.content))
-#     textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
+    rPegi = requests.get(img, headers=headers)
+    imagPegi = Image.open(io.BytesIO(rPegi.content))
+    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
 
-#     if "tiket" in textPegi.lower() and "hotel" in textPegi.lower():
-#         jenis = "flight hotel"
-#     elif "tiket" in textPegi.lower():
-#         jenis = "flight"
-#     elif "hotel" in textPegi.lower():
-#         jenis = "hotel"
-#     else:
-#         jenis = "lainnya"
-#     lokasi = ""
-#     for kota in kotas:
-#         if kota.lower() in judul.lower():
-#             lokasi = kota
-#             print(lokasi)
-#         else:
-#             if kota.lower() in textPegi.lower():
-#                 lokasi = kota
-#     # if 'http' not in img : img = 'https://www.pegipegi.com/promo/{}'.format(img)
-#     print("#############################")
-#     print("Citi")
-#     # print("Judul : ", judul)
-# #     print("Text : ", textPegi)
-#     # print("lokasi : ", lokasi)
-#     # print("Image : ", img)
-#     # print("jenis : ", jenis)
-#     # print("Link : ", link)
-#     # print("Tema : ", tema)
-#     # print("durasi : ", duration)
-#     print("############################# \n")
-#     db = mysql.connector.connect(
-#     host="127.0.0.1", user="root", password="", database="cenpro")
-#     cursor = db.cursor()
-#     sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,kategori,potongan) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)")
-#     val = (judul, lokasi, img, tema, link,7,jenis)
-#     cursor.execute(sql, val)
-#     db.commit()
-#     cursor.close()
-#     db.close()
+    if "tiket" in textPegi.lower() and "hotel" in textPegi.lower():
+        jenis = "flight hotel"
+    elif "tiket" in textPegi.lower():
+        jenis = "flight"
+    elif "hotel" in textPegi.lower():
+        jenis = "hotel"
+    else:
+        jenis = "lainnya"
+    lokasi = ""
+    for kota in kotas:
+        if kota.lower() in judul.lower():
+            lokasi = kota
+            print(lokasi)
+        else:
+            if kota.lower() in textPegi.lower():
+                lokasi = kota
+    # if 'http' not in img : img = 'https://www.pegipegi.com/promo/{}'.format(img)
+    print("#############################")
+    print("Citi")
+    # print("Judul : ", judul)
+#     print("Text : ", textPegi)
+    # print("lokasi : ", lokasi)
+    # print("Image : ", img)
+    # print("jenis : ", jenis)
+    # print("Link : ", link)
+    # print("Tema : ", tema)
+    # print("durasi : ", duration)
+    print("############################# \n")
+    db = mysql.connector.connect(
+    host="127.0.0.1", user="root", password="", database="cenpro")
+    cursor = db.cursor()
+    sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,kategori,potongan) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)")
+    val = (judul, lokasi, img, tema, linka,7,jenis)
+    cursor.execute(sql, val)
+    db.commit()
+    cursor.close()
+    db.close()
     
     
     
