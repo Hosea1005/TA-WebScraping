@@ -954,9 +954,26 @@ for tra in itemsTraveloka:
     except:
         judulTraveloka = "Tidak memiliki Judul"
     try:
-        jenis = tra["data-product"]
-    except:
-        jenis = "Tidak memiliki Judul"
+        aq = tra["data-product"]
+    except : aq=""
+    if "flight" in aq:
+        jenis = "flight"
+    # elif " flight" in aq & "hotel" in aq:
+    #     jenis = "hotel"
+    elif " hotel" in aq:
+        jenis = "hotel"
+    elif " train" in aq:
+        jenis = "akomodasi"
+    elif " bus" in aq:
+        jenis = "akomodasi"
+    elif " car" in aq:
+        jenis = "akomodasi"
+    elif " car" in aq:
+        jenis = "akomodasi"
+    elif " car" in aq:
+        jenis = "akomodasi"
+    else :
+        jenis = ""
     try:
         durationTraveloka = tra.find('div', 'promo-thumb-duration').text
         san = durationTraveloka.split('\n')
