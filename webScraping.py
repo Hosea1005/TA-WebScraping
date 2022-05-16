@@ -74,6 +74,54 @@ itemsGar = soupGar.findAll('div', 'col col-xs-12 col-sm-6 col-md-4')
 itemsCit = soupCit.findAll('table', 'no-border')
 
 
+
+#Hotels
+hotels = ['archipelago',
+          'intiwhiz',
+          'aryaduta',
+          'artotelgroup',
+          'marriot bonvoy'
+          ]
+
+
+
+
+#Maskapai
+
+pesaw = ['garuda',
+         'lion',
+         'lion air',
+         'citilink',
+         'trigana',
+         'pelita air',
+         'wings',
+         'air asia',
+         'airasia',
+         'tri-mg',
+         'nusantara air',
+         'indonesia air',
+         'sriwijaya',
+         'kalstrat',
+         'asialink',
+         'jayawijaya',
+         'batik',
+         'nam air',
+         'super air jet',
+         'susi air',
+         'alda trans papua',
+         'jetset',
+         'flynas',
+         'scoot',
+         'etihad',
+         'japan airlines',
+         'jetstar',
+         'cebu air',
+         'pegasus air',
+         'Qatar air',
+         'philippine airlines'
+         ]
+
+
 #Kota
 kotas = ['aceh', 'banda aceh', 'langsa','lhokseumawe', 'sabang', 'subulussalam','bali','denpasar','bangka belitung','pangkal pinang',
          'banten','cilegon','serang','tengerang','bengkulu','yogyakarta','gorontalo','jakarta','jambi','sungai penuh',
@@ -345,181 +393,359 @@ def check_location(kot,kal):
         else:
             continue
 #Scraping Sudah Fix
-#Masih tahap explorasi untuk  date 
-
-
-#Start - End Date
 
 
 
 
-######################Jenis dapat, Potongan gk dapat################
-#Belum DAPAT START and Date
 
-for gar in itemsCit:
-    judul = gar.text
+
+
+# ############Potongan dapat, jenis Dapat, lokasi hotel dapat, maskapai dapat, health sudah diperbaiki ###############
+    
+for peg in itemsPegi:
+    nilai = 1
+    jenisp = ""
+    judulPegi = peg.find('div', 'caption').find('p').text
+    
+    end = ""
+    start = ""
     try:
-        img = gar.find('img')['src']
-        if 'https' not in img:
-            img = 'https://www.citilink.co.id{}'.format(img)
+        durasiPegi = peg.find('p', 'endpromo').text
+        waktu = durasiPegi.replace("Periode promo:","")
+        if "s.d." in waktu:
+            haa = waktu.replace("s.d.","")
+            aa = re.sub(' +',' ',haa)
+            end = aa.split(' ')
+        elif "dan" in waktu:
+            haa = waktu.split('dan')
+            aa = re.sub(' +',' ',haa[1])
+            end = aa.split(' ')
+        elif "-" in waktu:
+            haa= waktu.split('-')
+            end = haa[1]
+            tgl = haa[0]
+            akhir = end.split(' ')
+            bulan = akhir[1]
+            tahun = akhir[2]
+            start = tgl+ " " + bulan+ " " + tahun
+            
+        getHariEnd = end[1]
+        getBulanEnd = end[2]
+        getTahubEnd = end[3]
+        
+        ass = getTahubEnd+" "+getBulanEnd+" "+getHariEnd
+        end = ass.format('YYYY-MM-DD')
     except:
-        img = "Tidak ada"
-
-    try:
-        linka = gar.find('a')['href']
-    except:
-        continue
-
-    deskripsi = BeautifulSoup(requests.get(linka).text, 'html.parser')
-    try:
-        try:
-            tema = deskripsi.find('ol').text
-        except:
-            tema = deskripsi.find('div', 'content').find(
-                'div', 'sfContentBlock').text
-    except:
-        tema = "Go to detail link promo"
-    duration = "Go to detail link promo"
-
-    rPegi = requests.get(img, headers=headers)
+        durasiPegi = 'Tidak memiliki durasi'
+    
+    
+    
+    linknyaPegi = peg.find('a')['href']
+    if "hotel" in judulPegi and "tiket pesawat" in judulPegi:
+        jenisp = "flight hotel"
+    elif "vaksinasi" in judulPegi:
+        jenisp = "health"
+    elif "covid" in judulPegi.lower():
+        jenisp = "health"
+    elif "covid" in linknyaPegi.lower():
+        jenisp = "health"
+    elif "rapid" in judulPegi.lower():
+        jenisp = "health"
+    elif "pcr" in judulPegi.lower():
+        jenisp = "health"
+    elif "hotel" in judulPegi:
+        jenisp = "hotel"
+    elif "oyo" in judulPegi.lower():
+            jenisp = "hotel"
+    elif "tiket pesawat" in judulPegi:
+        jenisp = "flight"
+    elif "dokter" in judulPegi.lower():
+        jenisp = "health"
+    else:
+        jenisp = "Kosong"
+    imgPegi = peg.find('div', 'thumbnail').find('img')['src']
+    if 'http' not in imgPegi:
+        imgPegi = 'https://www.pegipegi.com/promo/{}'.format(imgPegi)
+    # img = Image.open("ayu.png")
+    rPegi = requests.get(imgPegi, headers=headers)
     imagPegi = Image.open(io.BytesIO(rPegi.content))
     textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
-
-    if "tiket" in textPegi.lower() and "hotel" in textPegi.lower():
-        jenis = "flight hotel"
-    elif "tiket" in textPegi.lower():
-        jenis = "flight"
-    elif "hotel" in textPegi.lower():
-        jenis = "hotel"
-    else:
-        jenis = "lainnya"
+    # if 'http' not in img : img = 'https://www.pegipegi.com/promo/{}'.format(img)
+    deskripsiPegi = BeautifulSoup(
+        requests.get(linknyaPegi).text, 'html.parser')
+    try:
+        try:
+            temaPegi = deskripsiPegi.find(
+                'div', 'promo-info__description').text
+        except:
+            temaPegi = deskripsiPegi.find(
+                'div', 'promo-info__description--center').text
+    except:
+        try:
+            temaPegi = deskripsiPegi.find('div', 'wording').text
+        except:
+            temaPegi = 'kosong'
+    rPegi = requests.get(imgPegi, headers=headers)
+    imagPegi = Image.open(io.BytesIO(rPegi.content))
+    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
+    lokhot = ""
+    maskapai = ""
     lokasi = ""
     for kota in kotas:
-        if kota.lower() in judul.lower():
+        if kota.lower() in judulPegi.lower():
             lokasi = kota
-            print(lokasi)
+            # print(lokasi)
         else:
             if kota.lower() in textPegi.lower():
                 lokasi = kota
-    # if 'http' not in img : img = 'https://www.pegipegi.com/promo/{}'.format(img)
-    print("#############################")
-    print("Citi")
-    # print("Judul : ", judul)
-#     print("Text : ", textPegi)
-    # print("lokasi : ", lokasi)
-    # print("Image : ", img)
-    # print("jenis : ", jenis)
-    # print("Link : ", link)
-    # print("Tema : ", tema)
-    # print("durasi : ", duration)
-    print("############################# \n")
+    potongan =""
+    for mas in pesaw:
+        if mas.lower() in judulPegi.lower():
+            maskapai = mas
+    for hotl in hotels:
+        if hotl.lower() in judulPegi.lower():
+            lokhot = hotl
+    try:
+        if ".000.000" in judulPegi:
+            b = judulPegi.split('.000.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + ".000.000"
+        elif "00.000" in judulPegi:
+            b = judulPegi.split('00.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "00.000"
+        elif "50.000" in judulPegi:
+            b = judulPegi.split('50.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "50.000"
+        elif "0.000" in judulPegi:
+            b = judulPegi.split('0.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0.000"
+        elif "%" in judulPegi:
+            b = judulPegi.split('%')
+            d= b[0]
+            angka = d[-2:]
+            potongan = angka + "%"
+    except:
+        potongan =""
+
+    print("==================")
+    # print("kalimat\n ", textPegi)
+    # print("lokasi =  ", lokasi)
+    # print("lokasi =  ", imgPegi)
+    # print("Waktu =  ", waktu)
+    print("End =  ", jenisp)
+    print("Start =  ", maskapai)
+    print("Start =  ", lokhot)
+    # print("end =  ", end)
+    # print("end =  ", len(end))
+    print("==================")
+
     db = mysql.connector.connect(
-    host="127.0.0.1", user="root", password="", database="cenpro")
+    host="127.0.0.1", user="admin", password="=@!#254tecmint", database="centproDB")
     cursor = db.cursor()
-    sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,kategori,potongan) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)")
-    val = (judul, lokasi, img, tema, linka,7,jenis)
+    sql = ("INSERT INTO promo (name,location,img,description,link,id_website,start_date,end_date,category,discount,maskapai,lokasi_hotel) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+    val = (judulPegi, lokasi, imgPegi, temaPegi, linknyaPegi, 1,start,end,jenisp,potongan,maskapai,lokhot)
     cursor.execute(sql, val)
     db.commit()
     cursor.close()
     db.close()
-    
-    
-    
-    
-    
-    
-##################Potongan dapat , jenis dapat##############
+
+
+
+
+
+
+
+
+
+
+############Jenis dapat, potongan dapat, akomodasi dapat,maskapai, lokasi hotel,###############
 
   
-# End Time dapat , start tidak tersedia
-for nusa in itemsNusa:
+for tik in itemsTiket:
+    # try : name = tra.find('div','promo-thumb-desc').text
+    # except : name = "Tidak memiliki Judul"
+    # try : duration = tra.find('div','promo-thumb-duration').text
+    # except : duration = "Tidak memiliki masa berlaku"
     try:
-        judulNusa = nusa.find('div', {'class': 'txt-ket'}).text
+        linknyaTiket = tik['href']
+        if 'http' not in linknyaTiket:
+            linknyaTiket = 'https://www.tiket.com{}'.format(linknyaTiket)
     except:
-        judulNusa = "Tidak memiliki judul"
-    try:
-        imgNusa = nusa.find('img')['src']
-        if 'https' not in imgNusa:
-            imgNusa = 'https:{}'.format(imgNusa)
-    except:
-        imgNusa = "Tidak ada"
-    try:
-        linkNusa = nusa.find('a', 'tmbl-biru')['href']
-        if 'https' not in linkNusa:
-            linkNusa = 'https:{}'.format(linkNusa)
-    except:
-        linkNusa = "Tidak ada"
+        linknyaTiket = "Tidak memiliki link detail"
 
-    deskripsi = BeautifulSoup(requests.get(linkNusa).text, 'html.parser')
+    deskripsiTiket = BeautifulSoup(
+        requests.get(linknyaTiket).text, 'html.parser')
     try:
-        try:
-            temaNusa = deskripsi.find('table', 'txtpromo').text
-        except:
-            temaNusa = deskripsi.find('div', 'line2').text
+        temaTiket = deskripsiTiket.find('div', 'promo-detail-description').text
     except:
-        temaNusa = "Tidak memiliki deskripsi"
-    
-    dur = judulNusa
-    dura = dur.split("s.d.")
-    durat = dura[1]
-    end = durat.replace(" | Terbang:","")
-
-    if "pesawat" in linkNusa and "hotel" in linkNusa:
-        jenis = "flight hotel"
-    elif "hotel" in linkNusa:
-        jenis = "hotel"
-    elif "pesawat" in linkNusa:
+        temaTiket = 'kosong'
+    try:
+        judulTiket = deskripsiTiket.find('div', 'promo-detail-title').text
+    except:
+        judulTiket = 'kosong'
+    try:
+        periodeTiket = deskripsiTiket.find('div', 'content-wrap-col-right').find('p').text
+        
+        awal = periodeTiket.split('-')
+        st = awal[0]
+        en = awal[1]
+        end = en.replace(",","")
+        sta = ""
+        bulan =""
+        tahun =""
+        start = ""
+        if len(st) == 2 :
+            sta = end.split(' ')
+            bula = sta[2]
+            bulan = bula.replace(",","")
+            tahun = sta[3]
+            start = st + bulan +" "+ tahun
+        if len(st) > 3:
+            sta = end.split(' ')
+            bula = sta[2]
+            bulan = bula.replace(",","")
+            tahun = sta[3]
+            start = st+" "+ tahun        
+    except:
+        periodeTiket = ''
+    try:
+        imageTiket = tik.find('div', 'img-component').find('img')['data-src']
+    except:
+        imageTiket = "Tidak memiliki gambar"
+    akom = ""
+    if "pesawat" in linknyaTiket:
         jenis = "flight"
+    elif "campaign" in linknyaTiket:
+        if "pesawat" in temaTiket:
+            jenis = "flight"
+    elif"hotel" in linknyaTiket:
+        jenis = "hotel"
+    elif"homes" in linknyaTiket:
+        jenis = "hotel"
+    elif"kereta-api" in linknyaTiket:
+        maskapai = "train"
+        jenis = "akomodasi"
+    elif"sewa-mobil" in linknyaTiket:
+        maskapai = "car"
+        jenis = "akomodasi"
+    elif"airport-transfer" in linknyaTiket:
+        maskapai = "jemput"
+        jenis = "akomodasi"
     else:
-        jenis = "lainnya"
-    rPegi = requests.get(imgNusa, headers=headers)
+        jenis = ""
+    potongan =""
+    maskapai = ""
+    lokhot = ""
+    for mas in pesaw:
+        if mas.lower() in judulTiket.lower():
+            maskapai = mas
+        elif mas.lower() in temaTiket.lower():
+            maskapai = mas
+    for hotl in hotels:
+        if hotl.lower() in judulTiket.lower():
+            lokhot = hotl
+        elif hotl.lower() in temaTiket.lower():
+            lokhot = hotl
+    try:
+        if ".000.000" in judulTiket:
+            b = judulTiket.split('.000.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + ".000.000"
+        elif "00.000" in judulTiket:
+            b = judulTiket.split('00.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "00.000"
+        elif "0.000" in judulTiket:
+            b = judulTiket.split('0.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0.000"
+        elif ".000.000" in temaTiket:
+            b = temaTiket.split('.000.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + ".000.000"
+        elif "00.000" in temaTiket:
+            b = temaTiket.split('00.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "00.000"
+        elif "0.000" in temaTiket:
+            b = temaTiket.split('0.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0.000"
+        elif "0%" in judulTiket:
+            b = judulTiket.split('0%')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0%"
+        elif "0%" in temaTiket:
+            b = temaTiket.split('0%')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0%"
+        elif "100%" in judulTiket:
+            potongan = "100%"
+    except:
+        potongan = ""
+    rPegi = requests.get(imageTiket, headers=headers)
     imagPegi = Image.open(io.BytesIO(rPegi.content))
     textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
     lokasi = ""
     for kota in kotas:
-        if kota.lower() in judulNusa.lower():
+        if kota.lower() in judulTiket.lower():
             lokasi = kota
             print(lokasi)
         else:
             if kota.lower() in textPegi.lower():
                 lokasi = kota
-    potongan = ""
+#     print("================")
+#     # print("Kalimat\n : ", periodeTiket)
+#     # print("Start : ", start   )
+#     # print("Panjang Start : ", len(st))
+#     # print("Bulan : ", bulan)
     
-    try:
-        if "1.2" in judulNusa:
-            potongan = "1.200.000"
-        elif "1.125" in judulNusa:
-            potongan = "1.125.000"
-        elif "1.050" in judulNusa:
-            potongan = "1.050.000"
-    except: potongan=""
-
-    print("#############################")
-    print(jenis)
-    # print("Judul : ", judulNusa)
-    print("Text : ", textPegi)
-    print("image : ", imgNusa)
-    print("lokasi : ", lokasi)
-    print("Detail : ", linkNusa)
-    print("end : ", potongan)
-    print("tema : ", temaNusa)
-
-    print("############################# \n")
+    # print("judul : ", deskripsiTiket)
+    # print("tema : ", temaTiket)
+#     print("potongan : ", potongan)
+    print("jenis : ", jenis)
+    # print("End : ", end)
+    print("End : ", imageTiket)
+    print("================")
+    print("lokasi : ", maskapai)
+    print("image: ", lokhot)
+    print("akomodasi: ", akom)
     db = mysql.connector.connect(
-    host="127.0.0.1", user="root", password="", database="cenpro")
+    host="127.0.0.1", user="admin", password="=@!#254tecmint", database="centproDB")
     cursor = db.cursor()
-    sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,end_time,kategori,potongan) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
-    val = (judulNusa, lokasi, imgNusa, temaNusa, linkNusa, 5,end,jenis,potongan)
-    cursor.execute(sql, val)
+    sql = ("INSERT INTO promo (name,location,img,description,link,id_website,start_date,end_date,category,discount,maskapai,lokasi_hotel) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+    val = (judulTiket, lokasi, imageTiket, temaTiket, linknyaTiket,2,start,end,jenis,potongan,maskapai,lokhot)
+    cursor.execute(sql,val)
     db.commit()
     cursor.close()
     db.close()
-    
-    
-    
-    
-    
-###########Jenis dapaat, potongan Dapat###########
+
+
+
+
+
+
+
+
+
+
+
+###########Jenis dapaat, potongan Dapat, maskapai sudah dibuat tapi kosong, lokasi hotel dapat###########
 #     #Start dan End Dapat
 for paz in itemsAirpaz:
     judulAirpaz = paz.find('span', 'link normal-b has-text-grey-darker').text
@@ -624,10 +850,22 @@ for paz in itemsAirpaz:
             potongan = angka + "0.000"
         
     except :potongan =""
+    maskapai = ""
+    lokhot = ""
+    for mas in pesaw:
+        if mas.lower() in judulAirpaz.lower():
+            maskapai = mas
+        elif mas.lower() in tema.lower():
+            maskapai = mas
+    for hotl in hotels:
+        if hotl.lower() in judulAirpaz.lower():
+            lokhot = hotl
+        elif hotl.lower() in tema.lower():
+            lokhot = hotl
     print("#############################")
     # print("airpaz")
-    print("Judul : ", judulAirpaz)
-    print("Judul : ", potongan)
+    print("Judul : ", lokhot)
+    print("Judul : ", maskapai)
     # print("Tema : ", tema)
     # print("Duration : ", durationAirpaz)
     # print("Start : ", start)
@@ -639,145 +877,93 @@ for paz in itemsAirpaz:
     # print("Jenis : ", lokasi)
     print("############################# \n")
     db = mysql.connector.connect(
-    host="127.0.0.1", user="root", password="", database="cenpro")
+    host="127.0.0.1", user="admin", password="=@!#254tecmint", database="centproDB")
     cursor = db.cursor()
-    sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,start_time,end_time,kategori,potongan) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
-    val = (judulAirpaz, lokasi, imageAirpaz, tema, linkAirpaz, 4,start,end,jenis,potongan)
+    sql = ("INSERT INTO promo (name,location,img,description,link,id_website,start_date,end_date,category,discount,maskapai,lokasi_hotel) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+    val = (judulAirpaz, lokasi, imageAirpaz, tema, linkAirpaz, 4,start,end,jenis,potongan,maskapai,lokhot)
     cursor.execute(sql, val)
     db.commit()
     cursor.close()
     db.close()
     
-    
-    
-    
-    
-    
-    
-    
-    
-############Potongan dapat, jenis Dapat###############
-    
-for peg in itemsPegi:
-    nilai = 1
-    jenisp = ""
-    judulPegi = peg.find('div', 'caption').find('p').text
 
-    if "hotel" in judulPegi and "tiket pesawat" in judulPegi:
-        jenisp = "flight hotel"
-    elif "hotel" in judulPegi:
-        jenisp = "hotel"
-    elif "oyo" in judulPegi.lower():
-            jenisp = "hotel"
-    elif "tiket pesawat" in judulPegi:
-        jenisp = "flight"
-    elif "vaksinasi" in judulPegi:
-        jenisp = "health"
-    elif "covid" in judulPegi.lower():
-        jenisp = "health"
-    elif "rapid" in judulPegi.lower():
-        jenisp = "health"
-    elif "pcr" in judulPegi.lower():
-        jenisp = "health"
+
+
+
+
+# Masih tahap explorasi untuk  date 
+
+
+# Start - End Date
+
+
+
+
+#####################Jenis dapat, Potongan gk dapat,  tidak memiliki maskapai dan lokasi hotel pada website################
+# Belum DAPAT START and Date
+
+for gar in itemsCit:
+    judul = gar.text
+    try:
+        img = gar.find('img')['src']
+        if 'https' not in img:
+            img = 'https://www.citilink.co.id{}'.format(img)
+    except:
+        img = "Tidak ada"
+
+    try:
+        linka = gar.find('a')['href']
+    except:
+        continue
+
+    deskripsi = BeautifulSoup(requests.get(linka).text, 'html.parser')
+    try:
+        try:
+            tema = deskripsi.find('ol').text
+        except:
+            tema = deskripsi.find('div', 'content').find(
+                'div', 'sfContentBlock').text
+    except:
+        tema = "Go to detail link promo"
+    duration = "Go to detail link promo"
+
+    rPegi = requests.get(img, headers=headers)
+    imagPegi = Image.open(io.BytesIO(rPegi.content))
+    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
+
+    if "tiket" in textPegi.lower() and "hotel" in textPegi.lower():
+        jenis = "flight hotel"
+    elif "tiket" in textPegi.lower():
+        jenis = "flight"
+    elif "hotel" in textPegi.lower():
+        jenis = "hotel"
     else:
-        jenisp = "Kosong"
-    end = ""
-    start = ""
-    try:
-        durasiPegi = peg.find('p', 'endpromo').text
-        waktu = durasiPegi.replace("Periode promo:","")
-        if "s.d." in waktu:
-            haa = waktu.replace("s.d.","")
-            end = haa
-        if "-" in waktu:
-            haa= waktu.split('-')
-            end = haa[1]
-            tgl = haa[0]
-            akhir = end.split(' ')
-            bulan = akhir[1]
-            tahun = akhir[2]
-            start = tgl+ " " + bulan+ " " + tahun
-            
-    except:
-        durasiPegi = 'Tidak memiliki durasi'
-    linknyaPegi = peg.find('a')['href']
-    imgPegi = peg.find('div', 'thumbnail').find('img')['src']
-    if 'http' not in imgPegi:
-        imgPegi = 'https://www.pegipegi.com/promo/{}'.format(imgPegi)
-    # img = Image.open("ayu.png")
-    rPegi = requests.get(imgPegi, headers=headers)
-    imagPegi = Image.open(io.BytesIO(rPegi.content))
-    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
-    # if 'http' not in img : img = 'https://www.pegipegi.com/promo/{}'.format(img)
-    deskripsiPegi = BeautifulSoup(
-        requests.get(linknyaPegi).text, 'html.parser')
-    try:
-        try:
-            temaPegi = deskripsiPegi.find(
-                'div', 'promo-info__description').text
-        except:
-            temaPegi = deskripsiPegi.find(
-                'div', 'promo-info__description--center').text
-    except:
-        try:
-            temaPegi = deskripsiPegi.find('div', 'wording').text
-        except:
-            temaPegi = 'kosong'
-    rPegi = requests.get(imgPegi, headers=headers)
-    imagPegi = Image.open(io.BytesIO(rPegi.content))
-    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
+        jenis = "lainnya"
     lokasi = ""
     for kota in kotas:
-        if kota.lower() in judulPegi.lower():
+        if kota.lower() in judul.lower():
             lokasi = kota
             # print(lokasi)
         else:
             if kota.lower() in textPegi.lower():
                 lokasi = kota
-    potongan =""
-    try:
-        if ".000.000" in judulPegi:
-            b = judulPegi.split('.000.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + ".000.000"
-        elif "00.000" in judulPegi:
-            b = judulPegi.split('00.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "00.000"
-        elif "50.000" in judulPegi:
-            b = judulPegi.split('50.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "50.000"
-        elif "0.000" in judulPegi:
-            b = judulPegi.split('0.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "0.000"
-        elif "%" in judulPegi:
-            b = judulPegi.split('%')
-            d= b[0]
-            angka = d[-2:]
-            potongan = angka + "%"
-    except:
-        potongan =""
-
-    print("==================")
-    # print("kalimat\n ", textPegi)
-    # print("lokasi =  ", lokasi)
-    # print("lokasi =  ", imgPegi)
-    # print("Waktu =  ", waktu)
-    print("End =  ", potongan)
-    # print("Start =  ", start)
-    print("==================")
-
+    # if 'http' not in img : img = 'https://www.pegipegi.com/promo/{}'.format(img)
+    print("#############################")
+    print("Citi")
+    print("Judul : ", judul)
+    print("Text : ", textPegi)
+    print("lokasi : ", lokasi)
+    print("Image : ", img)
+    print("jenis : ", jenis)
+    print("Link : ", link)
+    print("Tema : ", tema)
+    print("durasi : ", duration)
+    print("############################# \n")
     db = mysql.connector.connect(
-        host="127.0.0.1", user="root", password="", database="cenpro")
+    host="127.0.0.1", user="admin", password="=@!#254tecmint", database="centproDB")
     cursor = db.cursor()
-    sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,start_time,end_time,kategori,potongan) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
-    val = (judulPegi, lokasi, imgPegi, jenisp, linknyaPegi, nilai,start,end,jenisp,potongan)
+    sql = ("INSERT INTO promo (name,location,img,description,link,id_website,category) VALUES (%s, %s, %s, %s, %s, %s, %s)")
+    val = (judul, lokasi, img, tema, linka,7,jenis)
     cursor.execute(sql, val)
     db.commit()
     cursor.close()
@@ -787,153 +973,182 @@ for peg in itemsPegi:
     
     
     
-    
-    
-
-############Jenis dapat, potongan dapat###############
+##################Potongan dapat , jenis dapat##############
 
   
-for tik in itemsTiket:
-    # try : name = tra.find('div','promo-thumb-desc').text
-    # except : name = "Tidak memiliki Judul"
-    # try : duration = tra.find('div','promo-thumb-duration').text
-    # except : duration = "Tidak memiliki masa berlaku"
+# End Time dapat , start tidak tersedia
+for nusa in itemsNusa:
     try:
-        linknyaTiket = tik['href']
-        if 'http' not in linknyaTiket:
-            linknyaTiket = 'https://www.tiket.com{}'.format(linknyaTiket)
+        judulNusa = nusa.find('div', {'class': 'txt-ket'}).text
     except:
-        linknyaTiket = "Tidak memiliki link detail"
+        judulNusa = "Tidak memiliki judul"
+    try:
+        imgNusa = nusa.find('img')['src']
+        if 'https' not in imgNusa:
+            imgNusa = 'https:{}'.format(imgNusa)
+    except:
+        imgNusa = "Tidak ada"
+    try:
+        linkNusa = nusa.find('a', 'tmbl-biru')['href']
+        if 'https' not in linkNusa:
+            linkNusa = 'https:{}'.format(linkNusa)
+    except:
+        linkNusa = "Tidak ada"
 
-    deskripsiTiket = BeautifulSoup(
-        requests.get(linknyaTiket).text, 'html.parser')
+    deskripsi = BeautifulSoup(requests.get(linkNusa).text, 'html.parser')
     try:
-        temaTiket = deskripsiTiket.find('div', 'promo-detail-description').text
+        try:
+            temaNusa = deskripsi.find('table', 'txtpromo').text
+        except:
+            temaNusa = deskripsi.find('div', 'line2').text
     except:
-        temaTiket = 'kosong'
-    try:
-        judulTiket = deskripsiTiket.find('div', 'promo-detail-title').text
-    except:
-        judulTiket = 'kosong'
-    try:
-        periodeTiket = deskripsiTiket.find('div', 'content-wrap-col-right').find('p').text
-        
-        awal = periodeTiket.split('-')
-        st = awal[0]
-        en = awal[1]
-        end = en.replace(",","")
-        sta = ""
-        bulan =""
-        tahun =""
-        start = ""
-        if len(st) == 2 :
-            sta = end.split(' ')
-            bula = sta[2]
-            bulan = bula.replace(",","")
-            tahun = sta[3]
-            start = st + bulan +" "+ tahun
-        if len(st) > 3:
-            sta = end.split(' ')
-            bula = sta[2]
-            bulan = bula.replace(",","")
-            tahun = sta[3]
-            start = st+" "+ tahun        
-    except:
-        periodeTiket = 'kosong'
-    try:
-        imageTiket = tik.find('div', 'img-component').find('img')['data-src']
-    except:
-        imageTiket = "Tidak memiliki gambar"
-    if "pesawat" in linknyaTiket:
+        temaNusa = "Tidak memiliki deskripsi"
+    
+    dur = judulNusa
+    dura = dur.split("s.d.")
+    durat = dura[1]
+    end = durat.replace(" | Terbang:","")
+
+    if "pesawat" in linkNusa and "hotel" in linkNusa:
+        jenis = "flight hotel"
+    elif "hotel" in linkNusa:
+        jenis = "hotel"
+    elif "pesawat" in linkNusa:
         jenis = "flight"
-    elif"hotel" in linknyaTiket:
-        jenis = "hotel"
-    elif"homes" in linknyaTiket:
-        jenis = "hotel"
-    elif"kereta-api" in linknyaTiket:
-        jenis = "akomodasi"
-    elif"sewa-mobil" in linknyaTiket:
-        jenis = "akomodasi"
-    elif"airport-transfer" in linknyaTiket:
-        jenis = "akomodasi"
     else:
         jenis = "lainnya"
-    potongan =""
-    try:
-        if ".000.000" in judulTiket:
-            b = judulTiket.split('.000.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + ".000.000"
-        elif "00.000" in judulTiket:
-            b = judulTiket.split('00.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "00.000"
-        elif "0.000" in judulTiket:
-            b = judulTiket.split('0.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "0.000"
-        elif ".000.000" in temaTiket:
-            b = temaTiket.split('.000.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + ".000.000"
-        elif "00.000" in temaTiket:
-            b = temaTiket.split('00.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "00.000"
-        elif "0.000" in temaTiket:
-            b = temaTiket.split('0.000')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "0.000"
-        elif "0%" in judulTiket:
-            b = judulTiket.split('0%')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "0%"
-        elif "0%" in temaTiket:
-            b = temaTiket.split('0%')
-            d= b[0]
-            angka = d[-1]
-            potongan = angka + "0%"
-        elif "100%" in judulTiket:
-            potongan = "100%"
-    except:
-        potongan = ""
-    rPegi = requests.get(imageTiket, headers=headers)
+    rPegi = requests.get(imgNusa, headers=headers)
     imagPegi = Image.open(io.BytesIO(rPegi.content))
     textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
     lokasi = ""
     for kota in kotas:
-        if kota.lower() in judulTiket.lower():
+        if kota.lower() in judulNusa.lower():
             lokasi = kota
             print(lokasi)
         else:
             if kota.lower() in textPegi.lower():
                 lokasi = kota
-    print("================")
-    # print("Kalimat\n : ", periodeTiket)
-    # print("Start : ", start   )
-    # print("Panjang Start : ", len(st))
-    # print("Bulan : ", bulan)
+    potongan = ""
     
-    print("judul : ", judulTiket)
-    print("tema : ", temaTiket)
-    print("potongan : ", potongan)
-    # print("End : ", end)
-    # print("End : ", end)
-    print("================")
+    try:
+        if "1.2" in judulNusa:
+            potongan = "1.200.000"
+        elif "1.125" in judulNusa:
+            potongan = "1.125.000"
+        elif "1.050" in judulNusa:
+            potongan = "1.050.000"
+    except: potongan=""
+
+    print("#############################")
+    print(jenis)
+    # print("Judul : ", judulNusa)
+    print("Text : ", textPegi)
+    print("image : ", imgNusa)
     print("lokasi : ", lokasi)
-    print("image: ", imageTiket)
-    db = mysql.connector.connect(host = "127.0.0.1",user="root", password = "", database="cenpro")
+    print("Detail : ", linkNusa)
+    print("end : ", potongan)
+    print("tema : ", temaNusa)
+
+    print("############################# \n")   
+    db = mysql.connector.connect(
+    host="127.0.0.1", user="admin", password="=@!#254tecmint", database="centproDB")
     cursor = db.cursor()
-    sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,start_time,end_time,kategori,potongan) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
-    val = (judulTiket, lokasi, imageTiket, temaTiket, linknyaTiket,2,start,end,jenis,potongan)
-    cursor.execute(sql,val)
+    sql = ("INSERT INTO promo (name,location,img,description,link,id_website,end_date,category,discount) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)")
+    val = (judulNusa, lokasi, imgNusa, temaNusa, linkNusa, 5,end,jenis,potongan)
+    cursor.execute(sql, val)
+    db.commit()
+    cursor.close()
+    db.close()
+    
+    
+    
+
+
+
+
+
+
+
+
+
+
+
+
+######Potongan harga dapat tapi jenis tidak dapat,maskapai dapat,akommodasi dan lokasi hotel kosong##########
+
+
+for gar in itemsGar:
+    try:
+        img = gar.find('img', 'img-responsive')['src']
+        if 'https' not in img:
+            img = 'https://www.garuda-indonesia.com{}'.format(img)
+    except:
+        img = "Tidak ada"
+    try:
+        link = gar.find('a', 'btn btn-secondary_square pull-right')['href']
+        if 'https' not in link:
+            link = 'https://www.garuda-indonesia.com{}'.format(link)
+    except:
+        link = "Tidak ada"
+    deskripsi = BeautifulSoup(requests.get(link).text, 'html.parser')
+    try:
+        judul = deskripsi.find('div', 'section-title').text
+    except:
+        judul = gar.find('div', 'description').text
+    try:
+        tema = deskripsi.find('div', 'content').text
+        # tema = tem.replace()
+    except:
+        tema = "Tidak ada"
+    duration = "Dapat dilihat di deskripsi"
+    rPegi = requests.get(img, headers=headers)
+    imagPegi = Image.open(io.BytesIO(rPegi.content))
+    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
+    potongan = ""
+    b = ""
+    if ".000.000" in textPegi:
+        b = textPegi.split('.000.000')
+        d= b[0]
+        angka = d[-1]
+        potongan = angka + ".000.000"
+    elif "00.000" in textPegi:
+        b = textPegi.split('00.000')
+        d= b[0]
+        angka = d[-1]
+        potongan = angka + "00.000"
+    elif "50.000" in textPegi:
+        b = textPegi.split('50.000')
+        d= b[0]
+        angka = d[-1]
+        potongan = angka + "50.000"
+    lokasi = ""
+    for kota in kotas:
+        if kota.lower() in judul.lower():
+            lokasi = kota
+            print(lokasi)
+        else:
+            if kota.lower() in textPegi.lower():
+                lokasi = kota
+    maskapai = "garuda"
+
+    # imageAirpaz = paz.find('img')['data-src']
+    print("#############################")
+    print("Garuda")
+    # print("lokasi : ", lokasi)
+    print("kata : ", textPegi)
+    print("Image : ", img)
+    print("Potongan : ", potongan)
+    print("Judul : ", judul)
+    print("link : ", link)
+    print("deskripsi : ", tema)
+    print("Durasi : ", duration)
+    print("############################# \n")
+    db = mysql.connector.connect(
+    host="127.0.0.1", user="admin", password="=@!#254tecmint", database="centproDB")
+    cursor = db.cursor()
+    sql = ("INSERT INTO promo (name,location,img,description,link,id_website,discount) VALUES (%s, %s, %s, %s, %s, %s, %s)")
+    val = (judul, lokasi, img, tema, link, 6,potongan)
+    cursor.execute(sql, val)
     db.commit()
     cursor.close()
     db.close()
@@ -946,7 +1161,8 @@ for tik in itemsTiket:
 
 
 
-#####Jenis,Potongan DAPAT###########
+
+#####Jenis,Potongan DAPAT, maskapai sudah dapat, lokasi hotel sudah, akomodasi sudah###########
 
 for tra in itemsTraveloka:
     try:
@@ -956,6 +1172,7 @@ for tra in itemsTraveloka:
     try:
         aq = tra["data-product"]
     except : aq=""
+    akom = ""
     if "flight" in aq:
         jenis = "flight"
     # elif " flight" in aq & "hotel" in aq:
@@ -963,28 +1180,36 @@ for tra in itemsTraveloka:
     elif " hotel" in aq:
         jenis = "hotel"
     elif " train" in aq:
+        maskapai = "train"
         jenis = "akomodasi"
     elif " bus" in aq:
+        maskapai = "bus"
         jenis = "akomodasi"
     elif " car" in aq:
-        jenis = "akomodasi"
-    elif " car" in aq:
-        jenis = "akomodasi"
-    elif " car" in aq:
+        maskapai = "car"
         jenis = "akomodasi"
     else :
         jenis = ""
+    
+    start =""
+    saa=""
     try:
         durationTraveloka = tra.find('div', 'promo-thumb-duration').text
+    except:
+        durationTraveloka = ""
+        
+    try:    
         san = durationTraveloka.split('\n')
         a = san[1]
         awal = san[1].split('-', 1)
         pisah = awal[0].split(':')
         hasil = pisah[1]
-        start = hasil.split("-")
-
-    except:
-        durationTraveloka = "Tidak memiliki masa berlaku"
+        if "until" in hasil .lower():
+            saa = hasil.lower();
+            z = saa.replace("until","")
+            end = z
+    except : start =""
+        
     try:
         linknyaTraveloka = tra.find('a')['href']
         if 'http' not in linknyaTraveloka:
@@ -1012,7 +1237,7 @@ for tra in itemsTraveloka:
         imageTraveloka = pisah[0]
         
     except:
-        imageTraveloka = "Tidak memiliki gambar"
+        imageTraveloka = ""
     
     rPegi = requests.get(imageTraveloka, headers=headers)
     imagPegi = Image.open(io.BytesIO(rPegi.content))
@@ -1068,6 +1293,18 @@ for tra in itemsTraveloka:
                 lokasi = kota
         if lokasi is None:
             lokasi = check_location(kotas, textPegi.lower())
+    maskapai = ""
+    lokhot = ""
+    for mas in pesaw:
+        if mas.lower() in judulTraveloka.lower():
+            maskapai = mas
+        elif mas.lower() in temaTraveloka.lower():
+            maskapai = mas
+    for hotl in hotels:
+        if hotl.lower() in judulTraveloka.lower():
+            lokhot = hotl
+        elif hotl.lower() in temaTraveloka.lower():
+            lokhot = hotl
     print("#############################")
     print("TRAVELOKA")
     # print("durasi : ", durationTraveloka)
@@ -1075,110 +1312,26 @@ for tra in itemsTraveloka:
     # print("panjang : ", len(hasil))
     # print("kalimat", textPegi)
     # print("lokasi", lokasi)
-    print("Judul : ",judulTraveloka)
-    print("kata : ", b)
-    print("Potongan : ", potongan)
+    # print("Judul : ",judulTraveloka)
+    # print("kata : ", b)
+    # print("Potongan : ", potongan)
     # print("Durasi : ", durationTraveloka)
     # print("start : ", hasil)
     # print("end : ", durationTraveloka)
     # print("Deskripsi : ",temaTraveloka)
     # print("Link Detail : ",linknyaTraveloka )
     # print("Link Image : ",imageTraveloka)
+    # print("Jenis : ", saa)
     print("Jenis : ", jenis)
+    print("Jenis : ", akom)
+    print("Jenis : ", maskapai)
+    print("Jenis : ", lokhot)
     print("############################# \n")
     db = mysql.connector.connect(
-    host="127.0.0.1", user="root", password="", database="cenpro")
+    host="127.0.0.1", user="admin", password="=@!#254tecmint", database="centproDB")
     cursor = db.cursor()
-    sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,potongan,kategori) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)")
-    val = (judulTraveloka, lokasi, imageTraveloka, temaTraveloka, linknyaTraveloka, 3,potongan,jenis)
-    cursor.execute(sql, val)
-    db.commit()
-    cursor.close()
-    db.close()
-
-
-
-
-
-
-
-
-
-
-######Potongan harga dapat tapi jenis tidak dapat##########
-
-
-for gar in itemsGar:
-    try:
-        img = gar.find('img', 'img-responsive')['src']
-        if 'https' not in img:
-            img = 'https://www.garuda-indonesia.com{}'.format(img)
-    except:
-        img = "Tidak ada"
-    try:
-        link = gar.find('a', 'btn btn-secondary_square pull-right')['href']
-        if 'https' not in link:
-            link = 'https://www.garuda-indonesia.com{}'.format(link)
-    except:
-        link = "Tidak ada"
-    deskripsi = BeautifulSoup(requests.get(link).text, 'html.parser')
-    try:
-        judul = deskripsi.find('div', 'section-title').text
-    except:
-        judul = gar.find('div', 'description').text
-    try:
-        tema = deskripsi.find('div', 'content').text
-        # tema = tem.replace()
-    except:
-        tema = "Tidak ada"
-    duration = "Dapat dilihat di deskripsi"
-    rPegi = requests.get(img, headers=headers)
-    imagPegi = Image.open(io.BytesIO(rPegi.content))
-    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
-    potongan = ""
-    b = ""
-    if ".000.000" in textPegi:
-        b = textPegi.split('.000.000')
-        d= b[0]
-        angka = d[-1]
-        potongan = angka + ".000.000"
-    elif "00.000" in textPegi:
-        b = textPegi.split('00.000')
-        d= b[0]
-        angka = d[-1]
-        potongan = angka + "00.000"
-    elif "50.000" in textPegi:
-        b = textPegi.split('50.000')
-        d= b[0]
-        angka = d[-1]
-        potongan = angka + "50.000"
-    lokasi = ""
-    for kota in kotas:
-        if kota.lower() in judul.lower():
-            lokasi = kota
-            print(lokasi)
-        else:
-            if kota.lower() in textPegi.lower():
-                lokasi = kota
-        
-
-    # imageAirpaz = paz.find('img')['data-src']
-    print("#############################")
-    print("Garuda")
-    # print("lokasi : ", lokasi)
-    print("kata : ", textPegi)
-    print("Image : ", img)
-    print("Potongan : ", potongan)
-    # print("Judul : ", judul)
-    # print("link : ", link)
-    # print("deskripsi : ", tema)
-    # print("Durasi : ", duration)
-    print("############################# \n")
-    db = mysql.connector.connect(
-    host="127.0.0.1", user="root", password="", database="cenpro")
-    cursor = db.cursor()
-    sql = ("INSERT INTO promo (judul,location,image,deskripsi,link,id_website,potongan) VALUES (%s, %s, %s, %s, %s, %s, %s)")
-    val = (judul, lokasi, img, tema, link, 6,potongan)
+    sql = ("INSERT INTO promo (name,location,img,description,link,id_website,discount,category,maskapai,lokasi_hotel) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)")
+    val = (judulTraveloka, lokasi, imageTraveloka, temaTraveloka, linknyaTraveloka, 3,potongan,jenis,maskapai,lokhot)
     cursor.execute(sql, val)
     db.commit()
     cursor.close()
