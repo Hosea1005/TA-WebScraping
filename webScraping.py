@@ -573,6 +573,31 @@ for peg in itemsPegi:
             d= b[0]
             angka = d[-2:]
             potongan = angka + "%"
+        elif ".000.000" in textPegi:
+            b = textPegi.split('.000.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + ".000.000"
+        elif "00.000" in textPegi:
+            b = textPegi.split('00.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "00.000"
+        elif "50.000" in textPegi:
+            b = textPegi.split('50.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "50.000"
+        elif "0.000" in textPegi:
+            b = textPegi.split('0.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0.000"
+        elif "%" in textPegi:
+            b = textPegi.split('%')
+            d= b[0]
+            angka = d[-2:]
+            potongan = angka + "%"
     except:
         potongan =""
 
@@ -721,6 +746,17 @@ for tik in itemsTiket:
             lokhot = hotl
         elif hotl.lower() in temaTiket.lower():
             lokhot = hotl
+    rPegi = requests.get(imageTiket, headers=headers)
+    imagPegi = Image.open(io.BytesIO(rPegi.content))
+    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
+    lokasi = ""
+    for kota in kotas:
+        if kota.lower() in judulTiket.lower():
+            lokasi = kota
+            print(lokasi)
+        else:
+            if kota.lower() in textPegi.lower():
+                lokasi = kota
     try:
         if ".000.000" in judulTiket:
             b = judulTiket.split('.000.000')
@@ -764,19 +800,23 @@ for tik in itemsTiket:
             potongan = angka + "0%"
         elif "100%" in judulTiket:
             potongan = "100%"
+        elif ".000.000" in textPegi:
+            b = textPegi.split('.000.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + ".000.000"
+        elif "00.000" in textPegi:
+            b = textPegi.split('00.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "00.000"
+        elif "0.000" in textPegi:
+            b = textPegi.split('0.000')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0.000"
     except:
         potongan = ""
-    rPegi = requests.get(imageTiket, headers=headers)
-    imagPegi = Image.open(io.BytesIO(rPegi.content))
-    textPegi = pytesseract.image_to_string(imagPegi, lang='eng')
-    lokasi = ""
-    for kota in kotas:
-        if kota.lower() in judulTiket.lower():
-            lokasi = kota
-            print(lokasi)
-        else:
-            if kota.lower() in textPegi.lower():
-                lokasi = kota
 # #     print("================")
 # # # #     # print("Kalimat\n : ", periodeTiket)
 # # # #     # print("Start : ", start   )
@@ -945,7 +985,21 @@ for paz in itemsAirpaz:
             d= b[0]
             angka = d[-1]
             potongan = angka + "0.000"
-        
+        elif ".000k" in textPegi:
+            b = textPegi.split('.000k')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + ".000.000"
+        elif "00k" in textPegi:
+            b = textPegi.split('00k')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "00.000"
+        elif "0k" in textPegi:
+            b = textPegi.split('0k')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0.000"
     except :potongan =""
     maskapai = ""
     lokhot = ""
@@ -1189,6 +1243,12 @@ for nusa in itemsNusa:
         elif "1.125" in judulNusa:
             potongan = "1.125.000"
         elif "1.050" in judulNusa:
+            potongan = "1.050.000"
+        elif "1.5" in textPegi:
+            potongan = "1.500.000"
+        elif "1.125" in textPegi:
+            potongan = "1.125.000"
+        elif "1.050" in textPegi:
             potongan = "1.050.000"
     except: potongan=""
 
@@ -1539,6 +1599,32 @@ for tra in itemsTraveloka:
             d= b[0]
             angka = d[-1]
             potongan = angka + "%"
+        
+        elif "00k" in textPegi:
+            b = textPegi.split('00k')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "00.000"
+        elif "50k" in textPegi:
+            b = textPegi.split('50k')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "50.000"
+        elif "20k" in textPegi:
+            b = textPegi.split('20k')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "20.000"
+        elif "0k" in textPegi:
+            b = textPegi.split('0k')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "0.000"
+        elif "5k" in textPegi:
+            b = textPegi.split('5k')
+            d= b[0]
+            angka = d[-1]
+            potongan = angka + "5.000"
     except: potongan = ""
     lokasi = ""
     for kota in kotas:
