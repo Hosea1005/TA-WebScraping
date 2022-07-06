@@ -1214,7 +1214,7 @@ for nusa in itemsNusa:
     durat = dura[1]
     end = durat.replace(" | Terbang:","")
     endd = end.split(" ")
-    enddd = datetime.date(int(2022), int( bulans[str(endd[2]).lower()]), int(endd[1]))
+    enddd = datetime.date((int(endd[3])), int( bulans[str(endd[2]).lower()]), int(endd[1]))
 
     if "pesawat" in linkNusa and "hotel" in linkNusa:
         jenis = "flight hotel"
